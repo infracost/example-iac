@@ -8,7 +8,7 @@ class WebAppStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    const instance = new ec2.Instance(this, 'MyWebApp', {
+    const instance = new ec2.Instance(this, 'MyWebApp2', {
       instanceType: new ec2.InstanceType('m3.xlarge'), // <<<<<<<<<< Try changing this to m5.xlarge to compare the costs
       machineImage: ec2.MachineImage.genericLinux({
         'us-east-1': 'ami-005e54dee72cc1d00',
