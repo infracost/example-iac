@@ -64,3 +64,19 @@ resource "aws_db_instance" "my_db" {
     Name = "my-db"
   }
 }
+
+resource "aws_cloudwatch_log_group" "app_logs" {
+  name = "my_app_logs"
+}
+
+resource "aws_s3_bucket" "screenshots_dev" {
+  bucket = "my_screenshots_bucket_dev"
+}
+
+resource "aws_s3_bucket" "screenshots_stage" {
+  bucket = "my_screenshots_bucket_stage"
+}
+
+resource "aws_s3_bucket" "screenshots_qa" {
+  bucket = "my_screenshots_bucket_qa"
+}
