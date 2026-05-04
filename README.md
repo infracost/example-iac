@@ -6,7 +6,7 @@ Use our [Get Started](https://www.infracost.io/docs) guide and the example proje
 
 ## Examples
 
-The AWS examples contain an EC2 instance, Lambda function, RDS MySQL database, and EKS cluster.
+The AWS examples contain an EC2 instance, Lambda function, RDS MySQL database, and EKS cluster. The Azure and Google examples contain similar resources for those clouds.
 
 | IaC Tool | Path |
 |----------|------|
