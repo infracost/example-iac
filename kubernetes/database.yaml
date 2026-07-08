@@ -1,0 +1,64 @@
+# Always-on StatefulSet — priced as (container requests) × replicas × 730h.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: database
+  namespace: prod
+  labels:
+    app: database
+    Service: database
+    Environment: Prod
+spec:
+  serviceName: database
+  replicas: 3 # <<<<<<<<<< Try changing this to 1 to compare the costs
+  selector:
+    matchLabels:
+      app: database
+  template:
+    metadata:
+      labels:
+        app: database
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16
+          resources:
+            requests:
+              cpu: "250m"
+              memory: 512Mi
+            limits:
+              cpu: "500m"
+              memory: 1Gi
+  # volumeClaimTemplates are priced per template × replicas, so this provisions
+  # 3 × 100Gi of io2 storage alongside the 3 database pods.
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        storageClassName: io2 # <<<<<<<<<< Try changing this to gp3 to compare the costs
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Gi
+---
+# Standalone PersistentVolumeClaim — priced from its storage class + requested
+# size. The provisioner annotation signals the cloud (here AWS EBS).
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: database-backups
+  namespace: prod
+  labels:
+    app: database
+    Service: database
+    Environment: Prod
+  annotations:
+    volume.beta.kubernetes.io/storage-provisioner: ebs.csi.aws.com
+spec:
+  storageClassName: gp3
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi

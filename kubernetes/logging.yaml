@@ -1,0 +1,27 @@
+# DaemonSet — one pod per node. Priced as (container requests) × node count × 730h.
+# Node count defaults to 1; set the `nodes` usage input (see infracost-usage.yml) to scale it.
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-agent
+  namespace: kube-system
+  labels:
+    app: node-agent
+    Service: node-agent
+    Environment: Prod
+spec:
+  selector:
+    matchLabels:
+      app: node-agent
+  template:
+    metadata:
+      labels:
+        app: node-agent
+    spec:
+      containers:
+        - name: agent
+          image: example/node-agent:latest
+          resources:
+            requests:
+              cpu: "100m"
+              memory: 256Mi
