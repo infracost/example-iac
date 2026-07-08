@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# dev: a single replica of everything, no external load balancer, and the small
+# gp3 volumes from the base. Cheap by design.
+namespace: dev
+
+# NOTE: using the legacy commonLabels because the Infracost parser does not yet
+# read the modern labels: transformer — see FIX-390. Switch back to labels: once
+# that lands.
+commonLabels:
+  Environment: Dev
+
+resources:
+  - ../../base
+
+replicas:
+  - name: api
+    count: 1
+  - name: database
+    count: 1
+
+patches:
+  - path: service-clusterip.yaml

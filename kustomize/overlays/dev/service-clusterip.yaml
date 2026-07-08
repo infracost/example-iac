@@ -1,0 +1,8 @@
+# dev has no public endpoint, so the api Service drops to ClusterIP.
+# The parser prices only LoadBalancer services, so this removes the LB cost.
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+spec:
+  type: ClusterIP
