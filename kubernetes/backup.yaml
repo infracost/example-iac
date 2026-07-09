@@ -1,0 +1,28 @@
+# CronJob — transient. Schedule drives runs/month; pricing also needs the
+# `runtime_hours_per_run` usage input (see infracost-usage.yml), otherwise it
+# shows as usage-dependent.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: db-backup
+  namespace: prod
+  labels:
+    app: db-backup
+    Service: db-backup
+    Environment: Prod
+spec:
+  schedule: "0 * * * *" # <<<<<<<<<< hourly -> 730 runs/month; try "0 0 * * *" (daily) to compare the costs
+  jobTemplate:
+    spec:
+      completions: 1
+      parallelism: 1
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: backup
+              image: example/pg-backup:latest
+              resources:
+                requests:
+                  cpu: "250m"
+                  memory: 512Mi

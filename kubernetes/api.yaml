@@ -1,0 +1,62 @@
+# Always-on Deployment — priced as (sum of container CPU/memory requests) × replicas × 730h.
+# The eks.amazonaws.com annotation tags this workload as AWS for cloud detection.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: prod
+  labels:
+    app: api
+    Service: api
+    Environment: Prod
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/api
+spec:
+  replicas: 3 # <<<<<<<<<< Try changing this to 5 to compare the costs
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: api
+          image: example/api:latest
+          resources:
+            requests:
+              cpu: "500m" # <<<<<<<<<< Try changing this to "1" to compare the costs
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+        - name: log-sidecar
+          image: example/fluentbit:latest
+          resources:
+            requests:
+              cpu: "100m"
+              memory: 64Mi
+---
+# LoadBalancer Service — priced as a cloud load balancer. The annotation selects
+# the flavour (here an AWS NLB) and signals the cloud for detection.
+# ClusterIP / NodePort / ExternalName services stay unpriced.
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+  namespace: prod
+  labels:
+    app: api
+    Service: api
+    Environment: Prod
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: nlb
+spec:
+  type: LoadBalancer
+  selector:
+    app: api
+  ports:
+    - port: 443
+      targetPort: 8443
+      protocol: TCP
