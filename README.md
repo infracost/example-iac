@@ -16,3 +16,4 @@ The AWS examples contain an EC2 instance, Lambda function, RDS MySQL database, a
 | CDK (JavaScript) | [cdk-javascript](cdk-javascript) |
 | CDK (Python) | [cdk-python](cdk-python) |
 | Kubernetes | [kubernetes](kubernetes) |
+| Kustomize | [kustomize](kustomize) |

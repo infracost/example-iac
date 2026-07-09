@@ -1,0 +1,7 @@
+# prod backs up hourly -> 730 runs/month.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: db-backup
+spec:
+  schedule: "0 * * * *"

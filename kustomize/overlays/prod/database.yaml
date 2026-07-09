@@ -1,0 +1,40 @@
+# prod database: larger pods and fast io2 volumes. volumeClaimTemplates are
+# replaced wholesale so the storage class and size are unambiguous. With 3
+# replicas this provisions 3 × 100Gi of io2 for the StatefulSet.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: database
+spec:
+  template:
+    spec:
+      containers:
+        - name: postgres
+          resources:
+            requests:
+              cpu: "1"
+              memory: 2Gi
+            limits:
+              cpu: "2"
+              memory: 4Gi
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        storageClassName: io2 # <<<<<<<<<< Try changing this to gp3 to compare the costs
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Gi
+---
+# prod backup volume is larger and also on io2.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: database-backups
+spec:
+  storageClassName: io2 # <<<<<<<<<< Try changing this to gp3 to compare the costs
+  resources:
+    requests:
+      storage: 200Gi

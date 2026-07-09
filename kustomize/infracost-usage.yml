@@ -1,0 +1,12 @@
+# You can use this file to define resource usage estimates for Infracost to use when calculating
+# the cost of usage-based resources, such as a Kubernetes CronJob's runtime or a DaemonSet's node count.
+# `infracost breakdown --path=overlays/prod --usage-file=infracost-usage.yml [other flags]`
+# See https://infracost.io/usage-file/ for docs
+version: 0.1
+# Kubernetes workloads are matched by their address: namespace.kind.name
+# The leading * wildcard matches the namespace so the same values apply to every overlay (dev, prod).
+resource_usage:
+  "*.CronJob.db-backup":
+    runtime_hours_per_run: 0.5 # Hours a single backup pod runs per execution.
+  "*.DaemonSet.node-agent":
+    nodes: 3 # Number of nodes the agent pod is scheduled on (one pod per node).
