@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# prod: scaled out and up — more replicas, larger requests, fast io2 volumes,
+# hourly backups, and the external NLB from the base is kept.
+namespace: prod
+
+# NOTE: using the legacy commonLabels because the Infracost parser does not yet
+# read the modern labels: transformer — see FIX-390. Switch back to labels: once
+# that lands.
+commonLabels:
+  Environment: Prod
+
+resources:
+  - ../../base
+
+replicas:
+  - name: api
+    count: 5 # <<<<<<<<<< Try changing this to 3 to compare the costs
+  - name: database
+    count: 3
+
+patches:
+  - path: api-resources.yaml
+  - path: database.yaml
+  - path: backup-schedule.yaml

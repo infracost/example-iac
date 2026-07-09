@@ -1,0 +1,57 @@
+# Always-on StatefulSet — priced as (container requests) × replicas × 730h.
+# volumeClaimTemplates add (storage × replicas). Sizes and storage class are
+# set per-environment in the overlays.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: database
+  labels:
+    app: database
+    Service: database
+spec:
+  serviceName: database
+  replicas: 1
+  selector:
+    matchLabels:
+      app: database
+  template:
+    metadata:
+      labels:
+        app: database
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16
+          resources:
+            requests:
+              cpu: "250m"
+              memory: 512Mi
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        storageClassName: gp3
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 20Gi
+---
+# Standalone PersistentVolumeClaim — priced from its storage class + requested
+# size. The provisioner annotation signals the cloud (here AWS EBS).
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: database-backups
+  labels:
+    app: database
+    Service: database
+  annotations:
+    volume.beta.kubernetes.io/storage-provisioner: ebs.csi.aws.com
+spec:
+  storageClassName: gp3
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi

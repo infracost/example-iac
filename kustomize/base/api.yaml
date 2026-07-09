@@ -1,0 +1,55 @@
+# Always-on Deployment — priced as (sum of container CPU/memory requests) × replicas × 730h.
+# Replica count and container sizes are set per-environment in the overlays.
+# The eks.amazonaws.com annotation tags this workload as AWS for cloud detection.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  labels:
+    app: api
+    Service: api
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: api
+          image: example/api:latest
+          resources:
+            requests:
+              cpu: "250m"
+              memory: 256Mi
+        - name: log-sidecar
+          image: example/fluentbit:latest
+          resources:
+            requests:
+              cpu: "50m"
+              memory: 64Mi
+---
+# LoadBalancer Service — priced as a cloud load balancer. The dev overlay
+# downgrades this to ClusterIP (unpriced); prod keeps it as an external AWS NLB.
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+  labels:
+    app: api
+    Service: api
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: nlb
+spec:
+  type: LoadBalancer
+  selector:
+    app: api
+  ports:
+    - port: 443
+      targetPort: 8443
+      protocol: TCP
