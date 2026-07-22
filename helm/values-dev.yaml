@@ -1,0 +1,33 @@
+# Development environment — small footprint, no public load balancer, backups
+# off. Infracost detects this file as the "dev" environment and renders the chart
+# with these values layered on top of values.yaml.
+environment: dev
+
+api:
+  replicas: 1 # <<<<<<<<<< Try changing this to 2 to compare the costs
+  resources:
+    requests:
+      cpu: "100m"
+      memory: 128Mi
+    limits:
+      cpu: "250m"
+      memory: 256Mi
+  service:
+    # No public endpoint in dev, so the api Service drops to ClusterIP (unpriced)
+    # and no cloud load balancer is provisioned.
+    type: ClusterIP
+
+database:
+  replicas: 1
+  resources:
+    requests:
+      cpu: "100m"
+      memory: 256Mi
+  storage:
+    size: 10Gi
+  # No scheduled backups in dev.
+  backups:
+    enabled: false
+
+cache:
+  replicas: 1

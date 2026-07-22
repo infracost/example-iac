@@ -1,0 +1,29 @@
+# Production environment — scaled out, larger requests, faster (io2) storage,
+# backups on. Infracost detects this file as the "prod" environment.
+environment: prod
+
+api:
+  replicas: 3 # <<<<<<<<<< Try changing this to 5 to compare the costs
+  resources:
+    requests:
+      cpu: "1" # <<<<<<<<<< Try changing this to "2" to compare the costs
+      memory: 1Gi
+    limits:
+      cpu: "2"
+      memory: 2Gi
+
+database:
+  replicas: 3
+  resources:
+    requests:
+      cpu: "500m"
+      memory: 1Gi
+  storage:
+    class: io2 # <<<<<<<<<< Try changing this to gp3 to compare the costs
+    size: 100Gi
+  backups:
+    enabled: true
+    size: 100Gi
+
+cache:
+  replicas: 3

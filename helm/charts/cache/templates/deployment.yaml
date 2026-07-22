@@ -1,0 +1,26 @@
+# Always-on Deployment contributed by the vendored cache subchart — costed
+# alongside the parent chart's workloads. Sizing comes from the parent's `cache:`
+# values.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cache
+  namespace: shop
+  labels:
+    app: cache
+    Service: cache
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: cache
+  template:
+    metadata:
+      labels:
+        app: cache
+    spec:
+      containers:
+        - name: redis
+          image: redis:7
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}

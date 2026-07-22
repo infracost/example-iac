@@ -1,0 +1,63 @@
+# Always-on StatefulSet — priced as (container requests) × replicas × 730h. Its
+# volumeClaimTemplates are priced per template × replicas, so prod provisions
+# 3 × 100Gi of io2 alongside the 3 database pods. Sizing and storage come from
+# values.yaml (see the markers there).
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: database
+  namespace: shop
+  labels:
+    app: database
+    Service: database
+    Environment: {{ .Values.environment }}
+spec:
+  serviceName: database
+  replicas: {{ .Values.database.replicas }}
+  selector:
+    matchLabels:
+      app: database
+  template:
+    metadata:
+      labels:
+        app: database
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16
+          resources:
+            {{- toYaml .Values.database.resources | nindent 12 }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        storageClassName: {{ .Values.database.storage.class }}
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.database.storage.size }}
+{{- if .Values.database.backups.enabled }}
+---
+# Standalone PersistentVolumeClaim — priced from its storage class + requested
+# size. The provisioner annotation signals the cloud (here AWS EBS). Disabled in
+# dev (database.backups.enabled=false).
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: database-backups
+  namespace: shop
+  labels:
+    app: database
+    Service: database
+    Environment: {{ .Values.environment }}
+  annotations:
+    volume.beta.kubernetes.io/storage-provisioner: ebs.csi.aws.com
+spec:
+  storageClassName: gp3
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.database.backups.size }}
+{{- end }}

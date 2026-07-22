@@ -1,0 +1,31 @@
+{{- if .Values.database.backups.enabled }}
+# CronJob — transient. The schedule drives runs/month; pricing also needs the
+# `runtime_hours_per_run` usage input (see infracost-usage.yml), otherwise it
+# shows as usage-dependent. The schedule lever lives in values.yaml. Disabled in
+# dev (database.backups.enabled=false).
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: db-backup
+  namespace: shop
+  labels:
+    app: db-backup
+    Service: db-backup
+    Environment: {{ .Values.environment }}
+spec:
+  schedule: {{ .Values.database.backups.schedule | quote }}
+  jobTemplate:
+    spec:
+      completions: 1
+      parallelism: 1
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: backup
+              image: example/pg-backup:latest
+              resources:
+                requests:
+                  cpu: "250m"
+                  memory: 512Mi
+{{- end }}

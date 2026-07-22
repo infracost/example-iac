@@ -1,0 +1,9 @@
+# Vendored cache subchart. Because it lives under the parent's charts/ directory
+# it renders (and is costed) as part of the parent chart, with its values supplied
+# by the parent's `cache:` block.
+apiVersion: v2
+name: cache
+description: Redis cache subchart for the shop chart.
+type: application
+version: 0.1.0
+appVersion: "7"
