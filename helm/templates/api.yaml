@@ -1,0 +1,64 @@
+# Always-on Deployment — priced as (sum of container CPU/memory requests) ×
+# replicas × 730h. Replica count and container sizes come from values.yaml (and
+# the per-environment overrides) — see the markers there to rightsize.
+# The eks.amazonaws.com annotation tags this workload as AWS for cloud detection.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: shop
+  labels:
+    app: api
+    Service: api
+    Environment: {{ .Values.environment }}
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/api
+spec:
+  replicas: {{ .Values.api.replicas }}
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: api
+          image: example/api:latest
+          resources:
+            {{- toYaml .Values.api.resources | nindent 12 }}
+        # A sidecar runs for the pod's lifetime, so its requests add to every
+        # replica's footprint.
+        - name: log-sidecar
+          image: example/fluentbit:latest
+          resources:
+            requests:
+              cpu: "100m"
+              memory: 64Mi
+{{- if eq .Values.api.service.type "LoadBalancer" }}
+---
+# LoadBalancer Service — priced as a cloud load balancer. The annotation selects
+# the flavour (here an AWS NLB) and signals the cloud for detection. The dev
+# environment sets api.service.type to ClusterIP, which is unpriced, so no load
+# balancer is provisioned there.
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+  namespace: shop
+  labels:
+    app: api
+    Service: api
+    Environment: {{ .Values.environment }}
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: nlb
+spec:
+  type: {{ .Values.api.service.type }}
+  selector:
+    app: api
+  ports:
+    - port: 443
+      targetPort: 8443
+      protocol: TCP
+{{- end }}

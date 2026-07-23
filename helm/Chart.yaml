@@ -1,0 +1,31 @@
+# Helm example for Infracost.
+#
+# Infracost renders this chart with the Helm SDK (the `helm template` codepath —
+# no cluster needed) and prices the workloads it produces, exactly as it does for
+# raw manifests and Kustomize. All the cost levers live in values.yaml, with
+# per-environment overrides in values-dev.yaml / values-prod.yaml — that is where
+# you rightsize, not in templates/.
+#
+#   infracost breakdown --path=. \
+#     --usage-file=infracost-usage.yml       # chart defaults (values.yaml)
+#
+# Each values-<env>.yaml is detected as a separate environment.
+apiVersion: v2
+name: shop
+description: A Deployment + LoadBalancer, a StatefulSet with storage, a backup CronJob, a logging DaemonSet, and a vendored cache subchart.
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+
+# cache is a subchart vendored under charts/cache (a full local chart), so Helm
+# and Infracost render it as part of this chart with no fetching, and Infracost
+# costs its workloads alongside the parent's. Helm requires every chart present
+# under charts/ to be declared here (helm lint flags it otherwise), so it is
+# listed with a file:// repository pointing at the vendored copy. A *remote*
+# dependency would instead use a chart-repo / oci:// / git repository; Infracost
+# fetches those through its guarded fetcher before rendering, so the render still
+# never touches the network.
+dependencies:
+  - name: cache
+    version: 0.1.0
+    repository: "file://charts/cache"

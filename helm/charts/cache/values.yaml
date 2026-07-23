@@ -1,0 +1,7 @@
+# Defaults for the cache subchart. The parent chart overrides these under its
+# `cache:` key (per environment).
+replicas: 1
+resources:
+  requests:
+    cpu: "100m"
+    memory: 128Mi
