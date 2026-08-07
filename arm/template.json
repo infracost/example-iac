@@ -31,7 +31,7 @@
     },
     "vmSize": {
       "type": "string",
-      "defaultValue": "Standard_D2s_v3",
+      "defaultValue": "Standard_D8s_v3",
       "metadata": {
         "description": "Size of the virtual machine"
       }
@@ -229,6 +229,26 @@
       "kind": "linux",
       "properties": {
         "reserved": true
+      },
+      "tags": {
+        "environment": "dev"
+      }
+    },
+    {
+      "type": "Microsoft.Sql/servers/databases",
+      "apiVersion": "2022-05-01-preview",
+      "name": "extra-db",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Sql/servers', variables('sqlServerName'))]"
+      ],
+      "sku": {
+        "name": "S0",
+        "tier": "Standard"
+      },
+      "properties": {
+        "collation": "SQL_Latin1_General_CP1_CI_AS",
+        "maxSizeBytes": 268435456000
       },
       "tags": {
         "environment": "dev"
