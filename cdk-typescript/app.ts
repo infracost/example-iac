@@ -31,6 +31,7 @@ class WebAppStack extends Stack {
       code: lambda.Code.fromInline('exports.test = () => {}'),
       functionName: 'test',
       memorySize: 512,
+      architecture: lambda.Architecture.ARM_64,
     });
     Tags.of(fn).add('Environment', 'Prod');
 
