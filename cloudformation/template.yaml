@@ -24,6 +24,8 @@ Resources:
     Properties:
       FunctionName: test
       Runtime: nodejs12.x
+      Architectures:
+        - arm64
       Handler: exports.test
       Code:
         S3Bucket: placeholder-bucket
