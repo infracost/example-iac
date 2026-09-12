@@ -23,5 +23,5 @@ spec:
           image: example/node-agent:latest
           resources:
             requests:
-              cpu: "100m"
+              cpu: "150m"
               memory: 256Mi
