@@ -18,3 +18,16 @@ The AWS examples contain an EC2 instance, Lambda function, RDS MySQL database, a
 | Kubernetes | [kubernetes](kubernetes) |
 | Kustomize | [kustomize](kustomize) |
 | Helm | [helm](helm) |
+
+## App code examples
+
+Infracost also checks the AI model calls in application code. Each example in [app-code](app-code) is the same small support assistant, which drafts replies with OpenAI and summarises tickets with Anthropic.
+
+| Language | Path | Models |
+|----------|------|--------|
+| Python | [app-code/python](app-code/python) | `gpt-4o`, `claude-sonnet-4-6` |
+| TypeScript | [app-code/typescript](app-code/typescript) | `gpt-5.5`, `claude-haiku-4-5` |
+| Go | [app-code/go](app-code/go) | `gpt-5.5`, `claude-sonnet-4-6` |
+| Java | [app-code/java](app-code/java) | `gpt-5.5`, `claude-sonnet-4-6` |
+
+The Python example calls `gpt-4o`, which OpenAI has deprecated, so Infracost flags it. The others use current models and pass.
